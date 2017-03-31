@@ -99,7 +99,15 @@ public class CmxMain {
             );
         } catch(ParseException exp) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("cmx", options);
+
+            String jarName = new java.io.File(CmxMain.class.getProtectionDomain()
+                    .getCodeSource()
+                    .getLocation()
+                    .getPath())
+                    .getName();
+
+            formatter.printHelp("java -jar " + jarName + " -k <keyspace> -m <metric_name> [options]",
+                    "Cassandra's command-line Metrics Collector\n", options, "");
         }
     }
 }
