@@ -21,7 +21,7 @@ public class CmxMain {
         Options options = new Options();
         options.addOption(OptionBuilder
                 .withLongOpt("metric")
-                .withDescription("Metric: Latency, Compaction. Required")
+                .withDescription("Required. Metric: Latency, Compaction.")
                 .isRequired(true)
                 .hasArg()
                 .create("m"));
@@ -35,7 +35,7 @@ public class CmxMain {
 
         options.addOption(OptionBuilder
                 .withLongOpt("n")
-                .withDescription("Required: ip:port. Default localhost:7199")
+                .withDescription("RMI endpoint: ip:port. Default localhost:7199")
                 .isRequired(false)
                 .hasArg()
                 .create("n"));
