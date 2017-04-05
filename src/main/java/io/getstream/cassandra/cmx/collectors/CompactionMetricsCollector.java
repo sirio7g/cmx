@@ -12,9 +12,10 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static java.lang.String.format;
 
@@ -43,11 +44,11 @@ public class CompactionMetricsCollector implements MetricsCollector {
     }
 
     private void printCompactionPerColumnFamilies(MBeanServerConnection serverConnection) throws MalformedObjectNameException, InstanceNotFoundException, IOException, ReflectionException, AttributeNotFoundException, MBeanException {
-        System.out.println(format("%30s %12s %12s", "Name", "Pending", "SSTable count"));
+        System.out.println(format("%30s %12s %15s", "Name", "Pending", "SSTable count"));
 
         int i = 0;
         for (Compaction compaction : collectCompactionMetrics(serverConnection)) {
-            System.out.println(format("%30s %12d %12d",
+            System.out.println(format("%30s %12d %15d",
                     compaction.getName(),
                     compaction.getPending(),
                     compaction.getSstableCount()
@@ -63,7 +64,7 @@ public class CompactionMetricsCollector implements MetricsCollector {
         List<Attribute> attributes = serverConnection.getAttributes(
                 new ObjectName("org.apache.cassandra.metrics:type=Compaction,name=TotalCompactionsCompleted"),
                 new String[]{"Count", "OneMinuteRate", "FiveMinuteRate", "FifteenMinuteRate", "MeanRate"}).asList();
-        System.out.println(format("Pending: %d, Count: %d, OneMinuteRate: %.3f, FiveMinuteRate: %.3f, FifteenMinuteRate: %.3f, MeanRate: %.3f",
+        System.out.println(format("Pending: %d, Count: %d, OneMinuteRate: %.3f, FiveMinuteRate: %.3f, FifteenMinuteRate: %.3f, MeanRate: %.3f\n",
                 pending,
                 attributes.get(0).getValue(),
                 attributes.get(1).getValue(),
@@ -72,8 +73,8 @@ public class CompactionMetricsCollector implements MetricsCollector {
                 attributes.get(4).getValue()));
     }
 
-    private Set<Compaction> collectCompactionMetrics(MBeanServerConnection serverConnection) throws MalformedObjectNameException, IOException, ReflectionException, InstanceNotFoundException, AttributeNotFoundException, MBeanException {
-        Set<Compaction> sortedSet = new TreeSet<>(new CompactionComparator(this.sort));
+    private List<Compaction> collectCompactionMetrics(MBeanServerConnection serverConnection) throws MalformedObjectNameException, IOException, ReflectionException, InstanceNotFoundException, AttributeNotFoundException, MBeanException {
+        List<Compaction> sortedSet = new ArrayList<>();
 
         for (ObjectName objectName : serverConnection.queryNames(new ObjectName("org.apache.cassandra.metrics:type=ColumnFamily,keyspace=" + keyspace + ",scope=*,name=PendingCompactions"), null)) {
             String cfName = objectName.getKeyProperty("scope");
@@ -90,6 +91,7 @@ public class CompactionMetricsCollector implements MetricsCollector {
             sortedSet.add(new Compaction(cfName, pending, sstableCount));
         }
 
+        Collections.sort(sortedSet, new CompactionComparator(this.sort));
         return sortedSet;
     }
 }

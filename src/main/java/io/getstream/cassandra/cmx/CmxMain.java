@@ -1,6 +1,7 @@
 package io.getstream.cassandra.cmx;
 
 import io.getstream.cassandra.cmx.collectors.CompactionMetricsCollector;
+import io.getstream.cassandra.cmx.collectors.LatencyMetricsCollector;
 import io.getstream.cassandra.cmx.collectors.MetricsCollector;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -75,7 +76,7 @@ public class CmxMain {
 
             switch (line.getOptionValue("m")) {
                 case "Latency":
-                    collector = new CompactionMetricsCollector(
+                    collector = new LatencyMetricsCollector(
                             line.getOptionValue("k"),
                             line.hasOption("c") == true ? new HashSet<>(Arrays.asList(line.getOptionValues("c"))) : null,
                             line.hasOption("l") == true ? Integer.valueOf(line.getOptionValue("l")) : 10,

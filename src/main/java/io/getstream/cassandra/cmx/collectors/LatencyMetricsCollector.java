@@ -10,11 +10,12 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static java.lang.String.format;
 
@@ -61,8 +62,8 @@ public class LatencyMetricsCollector implements MetricsCollector {
         System.out.println("\n");
     }
 
-    private Set<ColumnFamilyLatency> collectLatencyMetrics(MBeanServerConnection serverConnection, String metricsName, Map<String, ColumnFamilyLatency> cfContainer) throws MalformedObjectNameException, IOException, ReflectionException, InstanceNotFoundException {
-        Set<ColumnFamilyLatency> sortedSet = new TreeSet<>(new RateComparator(this.sort));
+    private List<ColumnFamilyLatency> collectLatencyMetrics(MBeanServerConnection serverConnection, String metricsName, Map<String, ColumnFamilyLatency> cfContainer) throws MalformedObjectNameException, IOException, ReflectionException, InstanceNotFoundException {
+        List<ColumnFamilyLatency> sortedSet = new ArrayList<>();
 
         for (ObjectName objectName : serverConnection.queryNames(new ObjectName("org.apache.cassandra.metrics:type=ColumnFamily,keyspace=" + keyspace + ",scope=*,name=" + metricsName), null)) {
             String cfName = objectName.getKeyProperty("scope");
@@ -93,6 +94,7 @@ public class LatencyMetricsCollector implements MetricsCollector {
             sortedSet.add(cfLatency);
         }
 
+        Collections.sort(sortedSet, new RateComparator(this.sort));
         return sortedSet;
     }
 

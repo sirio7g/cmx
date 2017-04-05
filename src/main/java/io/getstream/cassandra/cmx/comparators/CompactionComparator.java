@@ -11,17 +11,11 @@ public class CompactionComparator implements Comparator<Compaction> {
         SSTABLE_COUNT;
     }
 
-    private final RateType rateType;
+    private RateType rateType = RateType.PENDING_COMPACTIONS;;
 
     public CompactionComparator(final String type) {
-        if (type != null) {
-            if (type.equals("PendingCompactions")) {
-                this.rateType = RateType.PENDING_COMPACTIONS;
-            } else {
-                this.rateType = RateType.SSTABLE_COUNT;
-            }
-        } else {
-            this.rateType = RateType.PENDING_COMPACTIONS;
+        if (type.equals("SSTableCount")) {
+            this.rateType = RateType.SSTABLE_COUNT;
         }
     }
 
@@ -32,7 +26,8 @@ public class CompactionComparator implements Comparator<Compaction> {
                 return Integer.compare(o1.getPending(), o2.getPending()) * -1;
             case SSTABLE_COUNT:
                 return Integer.compare(o1.getSstableCount(), o2.getSstableCount()) * -1;
+            default:
+                return Integer.compare(o1.getPending(), o2.getPending()) * -1;
         }
-        throw new UnsupportedOperationException();
     }
 }
